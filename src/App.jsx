@@ -1,16 +1,30 @@
 import { useState } from "react";
+import Picture from "./components/Picture";
 import "./App.css";
 
 function App() {
   const [word, setWord] = useState("");
+  const [photos, setPhotos] = useState([]);
 
   function searchImage(e) {
     e.preventDefault();
     if (!word) {
       alert("กรุณาป้อนชื่อรูปภาพ");
     } else {
-      //เรียกใช้งาน api
-      console.log(word)
+      fetchImageFromAPI();
+    }
+  }
+
+  async function fetchImageFromAPI() {
+    const url = `${import.meta.env.VITE_API_URL}?page=1&query=${word}&client_id=${import.meta.env.VITE_API_KEY}&per_page=15`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const result = data.results;
+    if (result.length == 0) {
+      alert("ไม่มีข้อมูลรูปภาพ");
+      setWord("");
+    } else {
+      setPhotos(result);
     }
   }
   return (
@@ -25,6 +39,11 @@ function App() {
         />
         <button type="submit">ค้นหา</button>
       </form>
+      <div className="search-result">
+        {photos.map((data, index) => {
+          return <Picture {...data} key={index} />;
+        })}
+      </div>
     </>
   );
 }
